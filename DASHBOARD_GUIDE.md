@@ -77,7 +77,5 @@ Annual estimates depend on the fixed observation-period and cost assumptions. So
 
 ### Future improvements
 
-- Add an interactive cost-per-minute parameter.
 - Explore variation by relevant case characteristics, such as anesthesia type or patient acuity.
 - Test benchmarks on independent data.
-- Compare actual and booked durations if scheduling data becomes available.
