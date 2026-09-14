@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "OR_Scheduling_Reliability"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9eae3211-cd37-4d4a-8e6e-3acd4c2411d9"
+  }
+}

@@ -1,0 +1,5 @@
+relationship AutoDetected_78e7bbc5-ce9a-4280-8c16-54e4d916bf66
+	crossFilteringBehavior: bothDirections
+	fromColumn: 'gold fact_cases'.procedure_nm
+	toColumn: 'gold procedure_baseline'.Procedure
+

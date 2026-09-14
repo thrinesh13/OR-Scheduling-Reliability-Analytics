@@ -1,165 +1,167 @@
 # OR Scheduling Reliability & Cost Exposure
 
-An end-to-end healthcare analytics project that uses historical operating-room (OR) data to evaluate how reliably procedure durations can be estimated, identify procedures that warrant scheduling review, and quantify the scale of associated time and cost exposure.
+**An end-to-end healthcare analytics project that turns perioperative data into procedure-level insights for scheduling review.** Built with Microsoft Fabric, PySpark, SQL, and Power BI, with a public interactive web dashboard.
 
-![Dashboard overview](OR_OVERVIEW.png)
+### [▶ Open the live interactive dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)
 
-| Project result | Value |
+**No sign-in or Power BI license is needed to explore the web dashboard.**
+
+[Dashboard guide](docs/DASHBOARD_GUIDE.md) · [Data quality](docs/DATA_QUALITY.md) · [Data lineage](docs/DATA_LINEAGE.md) · [Run the project](docs/SETUP.md)
+
+![Power BI report overview](assets/OR_OVERVIEW.png)
+
+> **What this measures:** Actual OR duration compared with each procedure’s **historical median duration—not its booked schedule**.
+>
+> **What the dollar figures mean:** Gross time-cost scenarios, **not confirmed losses, avoidable costs, or recoverable savings**.
+
+## The business question
+
+**Which procedures combine frequent duration differences with substantial accumulated time variation, and should be reviewed first?**
+
+A procedure can accumulate high exposure because it is performed often, because its durations vary widely, or both. This project keeps **reliability** and **exposure** separate so stakeholders can see why a procedure warrants attention.
+
+## Results at a glance
+
+| Metric | Result |
 |---|---:|
-| Perioperative records processed | 1.9M+ |
-| Curated surgical cases | 48,118 |
-| Procedures analyzed | 418 |
-| Average absolute difference from benchmark | 54.1 minutes |
-| Cases outside ±30 minutes | 53.3% |
-| Estimated annual gross cost exposure | $15.8M–$27.1M |
+| Source records staged across four tables | **1,880,637** |
+| Qualifying surgical cases | **48,118** |
+| Procedures analyzed | **418** |
+| Mean absolute difference from benchmark | **54.1 min** |
+| Median absolute difference | **33.0 min** |
+| Cases outside ±30 minutes | **53.28%** |
+| Annualized absolute time variation | **452,335 min/year** |
+| Annual gross exposure at $35/min | **$15.8M** |
+| Annual gross exposure at $60/min | **$27.1M** |
 
-> **Important:** The benchmark is each procedure's historical median OR duration, not its originally booked time. This project measures predictability against history; it does not measure adherence to an actual schedule.
+**Only 46.72% of cases fall within ±30 minutes of the historical benchmark.** The mean exceeds the median, indicating that larger differences raise the overall average.
 
-## Business case
+| Timing outcome | Cases | Share |
+|---|---:|---:|
+| More than 30 minutes below benchmark | 11,339 | 23.56% |
+| Within ±30 minutes, inclusive | 22,481 | 46.72% |
+| More than 30 through 60 minutes above benchmark | 5,077 | 10.55% |
+| More than 60 minutes above benchmark | 9,221 | 19.16% |
+| **Total** | **48,118** | **100%** |
 
-Operating rooms are among a hospital's most expensive and capacity-constrained resources. Each room must be staffed, equipped, and scheduled carefully, so unreliable case-duration estimates can affect the rest of the operating day.
+The four buckets are mutually exclusive. Individually rounded shares sum to 99.99%.
 
-When a case runs longer than expected, later cases may be delayed and staffing needs may extend beyond plan. When a case finishes substantially earlier, allocated room time may remain unused. Both directions represent scheduling uncertainty, but operational reporting often focuses only on overruns.
+## Explore the dashboard
 
-This project treats early finishes and overruns as parts of the same reliability problem. It answers four business questions:
+- **Review focus:** Narrow the cohort to a review category.
+- **Procedure selection:** Find a procedure and inspect its benchmark and reliability metrics.
+- **Timing distribution:** Select a timing bucket to explore the corresponding cases.
+- **Prioritization scatter:** Compare annualized time variation against the percentage outside ±30 minutes; bubble size represents case volume.
+- **Procedure table:** Compare volume, historical benchmarks, and review context.
 
-1. How closely do actual OR durations align with historical procedure-duration benchmarks?
-2. How often do cases fall more than 30 or 60 minutes above baseline, or more than 30 minutes below it?
-3. What annual time and cost exposure is associated with these differences?
-4. Which procedures should be prioritized for scheduling review?
+**The web dashboard is a self-contained HTML recreation of the Power BI overview using a fixed data snapshot.** It is not connected to a live Fabric refresh. See the [dashboard guide](docs/DASHBOARD_GUIDE.md) for filtering behavior and differences from Power BI.
 
-The result is a decision-support tool for OR operations, perioperative leaders, and hospital leadership. It identifies where review may create the most value without claiming that the estimated exposure is fully avoidable or recoverable.
+## Data and analytical scope
 
-## Dataset
+The source is **[MOVER](https://doi.org/10.24432/C5VS5G)**, the Medical Informatics Operating Room Vitals and Events Repository from UC Irvine Medical Center. **Source access requires a data-use agreement; raw source files are not distributed here.**
 
-The project uses the [MOVER dataset](https://doi.org/10.24432/C5VS5G) (Medical Informatics Operating Room Vitals and Events Repository), a public, de-identified perioperative dataset from the University of California, Irvine Medical Center. Access to the source data requires a signed data-use agreement.
-
-Four source tables were ingested:
-
-| Source | Bronze rows | Purpose |
+| Source extract | Bronze rows | Use in this project |
 |---|---:|---|
-| Patient information | 65,728 | Case, procedure, patient, anesthesia, and OR timestamps |
-| Patient history | 970,741 | Historical patient records |
-| Procedure events | 640,223 | Events recorded during procedures |
-| Post-operative complications | 203,945 | Post-operative outcomes |
+| Patient information | 65,728 | Current analysis |
+| Patient history | 970,741 | Staged for future work |
+| Procedure events | 640,223 | Staged for future work |
+| Post-operative complications | 203,945 | Staged for future work |
 
-The current analysis is built from the patient-information source. The other three tables are retained in Bronze for future extensions and are not used in the present findings.
+**Only patient information contributes to the current dashboard.** The 1.88M staged records are not 1.88M surgical cases.
 
-The final analytical cohort contains **48,118 cases across 418 procedures**. Procedures with fewer than 30 qualifying cases were excluded so each historical duration benchmark had a minimum supporting volume.
+Silver contains **64,353** cleaned records. Gold retains qualifying cases with usable OR timestamps, durations of **10–720 minutes**, and procedures supported by **at least 30 cases**, producing the 48,118-case analytical cohort.
 
-Dataset reference: Samad M, Angel M, Rinehart J, Kanomata Y, Baldi P, Cannesson M. [*Medical Informatics Operating Room Vitals and Events Repository (MOVER): a public-access operating room database*](https://doi.org/10.1093/jamiaopen/ooad084). *JAMIA Open*, 2023.
+Reference: Samad et al. (2023), [MOVER: a public-access operating room database](https://doi.org/10.1093/jamiaopen/ooad084), *JAMIA Open*.
 
-## Project
+## How it was built
 
-### 1. Data engineering in Microsoft Fabric
+```mermaid
+flowchart LR
+    A[MOVER CSV extracts] --> B[Bronze: raw Delta tables]
+    B --> C[Silver: clean and validate cases]
+    C --> D[Gold: case facts and procedure baselines]
+    D --> E[Power BI model and report]
+    E --> F[Public HTML dashboard snapshot]
+```
 
-The data was processed in a Fabric Lakehouse using a medallion design:
-
-| Layer | Role | Output |
+| Stage | Main work | Source |
 |---|---|---|
-| Bronze | Preserve the source extracts without transformation | Reproducible raw Delta tables |
-| Silver | Standardize fields, resolve duplicates, validate timestamps, and retain flags for repaired values | One analysis-ready row per surgical case |
-| Gold | Apply cohort rules, calculate procedure benchmarks, and derive case-level reliability measures | `gold.procedure_baseline` and `gold.fact_cases` |
+| **Bronze** | Ingest four extracts and reconcile row counts | [01 — Ingestion](notebooks/01_bronze_ingest.ipynb) |
+| **Silver** | Resolve duplicates, standardize procedures, validate and repair timestamps, retain quality flags | [02 — Cleaning](notebooks/02_silver_patient_information.ipynb) |
+| **Gold** | Apply cohort rules, calculate procedure medians, derive case deviations, reconcile totals | [03 — Analytical tables](notebooks/03_gold.ipynb) |
+| **Power BI** | Import Gold tables, define DAX metrics, and build the interactive report | [Power BI source](powerbi/) |
+| **Web** | Present the report overview as a public interactive snapshot | [Dashboard](dashboard/index.html) |
 
-Detailed profiling, repair rules, validation evidence, and feature engineering are documented in [DATA_QUALITY.md](DATA_QUALITY.md). The source-to-dashboard flow and table dependencies are documented in [DATA_LINEAGE.md](DATA_LINEAGE.md).
+**Technology:** Microsoft Fabric · Delta Lake · PySpark · Spark SQL · Power BI · DAX · PBIP/PBIR · TMDL · HTML/CSS/JavaScript · GitHub Pages.
 
-### 2. Analytical model
+## Metric definitions and interpretation
 
-Each procedure's expected duration is defined as its historical median OR duration. Every qualifying case is compared with that benchmark using:
+- **Benchmark:** Historical median OR duration for each qualifying procedure.
+- **Signed difference:** Actual OR duration minus benchmark.
+- **Absolute difference:** Magnitude of the signed difference, counting both early and late cases.
+- **Annualized variation:** **2,600,928 total absolute deviation minutes ÷ 5.75 assumed years**.
+- **Gross exposure:** Annualized variation multiplied by **$35/min** or **$60/min**.
+- **Review categories:** Compare procedure exposure and reliability with fixed cohort medians; these are relative comparison groups, **not clinical performance targets**.
 
-- `schedule_error_min`: signed difference from baseline
-- `abs_error_min`: magnitude of the difference
-- `overrun_30`: more than 30 minutes above baseline
-- `overrun_60`: more than 60 minutes above baseline
-- `early_30`: more than 30 minutes below baseline
+**Portfolio KPIs are calculated at case level.** Averaging procedure percentages would incorrectly give a small procedure group the same weight as a large one.
 
-The model keeps reliability and accumulated exposure separate. This prevents a high-volume but relatively predictable procedure from being treated the same as a lower-volume procedure with high per-case variability.
+## Limitations and next steps
 
-### 3. Power BI report
+- **Retrospective benchmark:** Derived from the same cohort, with no independent holdout validation.
+- **Shifted dates:** Patient-specific date shifting prevents valid cross-patient calendar analysis such as seasonality or year-over-year trends.
+- **Restricted cohort:** Low-volume procedures and cases outside eligibility rules are excluded.
+- **Scenario assumptions:** The 5.75-year divisor and cost-per-minute rates are fixed planning assumptions.
+- **Descriptive findings:** The analysis identifies where variation occurs; it does not establish causes or demonstrate savings.
 
-The Power BI report provides:
+**Next steps:** Validate benchmarks on independent data, investigate relevant case characteristics, and incorporate actual booked durations before evaluating scheduling interventions.
 
-- Headline KPIs for case volume, procedure count, average and median absolute difference, annualized time variation, and cost exposure
-- A timing-outcome view separating early cases, cases within ±30 minutes, 30–60 minute overruns, and overruns above 60 minutes
-- A prioritization scatter comparing annualized time variation with the percentage of cases outside ±30 minutes
-- A searchable procedure table for detailed review
-- Cross-filtering and review categories that support movement from the full cohort to an individual procedure
+## Open or reproduce the project
 
-See [DASHBOARD_GUIDE.md](DASHBOARD_GUIDE.md) for metric definitions, visual behavior, and guidance on interpreting the report.
+**For visitors:** [Open the live dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/).
 
-## Key findings
+**For Power BI users:** Download or clone the repository and open [`powerbi/OR_Scheduling_Reliability.pbip`](powerbi/OR_Scheduling_Reliability.pbip) in a current compatible Power BI Desktop version. Keep its adjacent report and semantic-model folders together.
 
-### Scheduling variation is widespread
+**For refresh or rebuilding:** Follow [setup instructions](docs/SETUP.md). You need authorized source access and your own configured Fabric environment. **The Power BI cache is intentionally excluded**, so a fresh checkout needs a data refresh; the web dashboard works independently.
 
-Only **46.7%** of cases fall within ±30 minutes of their procedure benchmark. The remaining **53.3%** finish more than 30 minutes early or run more than 30 minutes over baseline.
+Notebook source and transformation logic are retained; saved outputs, execution state, and workspace attachment metadata are removed. Supporting CSV exports retain their original filenames and values. Updating those CSVs alone does not rebuild the web dashboard.
 
-| Timing outcome | Share of cases |
-|---|---:|
-| More than 30 minutes above baseline | 29.7% |
-| More than 60 minutes above baseline | 19.2% |
-| More than 30 minutes below baseline | 23.6% |
-| Within ±30 minutes | 46.7% |
+## Project structure
 
-The mean absolute difference is **54.1 minutes**, while the median is **33.0 minutes**, showing that larger deviations materially raise the average.
-
-### The exposure is operationally significant
-
-The cohort contains **2,600,928 total absolute deviation minutes**. Annualized over the 5.75-year observation period, this equals approximately **452,335 minutes per year**.
-
-Applying two cost-per-minute scenarios produces an estimated annual gross exposure of:
-
-- **$15.8 million** at $35 per minute
-- **$27.1 million** at $60 per minute
-
-These figures are scenario estimates of gross exposure, not measured financial loss or guaranteed recoverable savings.
-
-### No single procedure explains the problem
-
-**Laparotomy, Exploratory** has the highest accumulated deviation but accounts for only **3.2%** of the cohort's total. Exposure is distributed across the procedure mix, supporting a systematic review process rather than a one-procedure fix.
-
-### Prioritization requires both volume and reliability
-
-Procedures can accumulate high total variation because they occur frequently, because their individual cases are difficult to predict, or both. The dashboard therefore compares accumulated exposure and the rate of cases outside ±30 minutes as separate dimensions.
-
-## Limitations
-
-- The source does not contain originally booked case durations. Results compare actual duration with a historical median, so they measure predictability rather than true schedule adherence.
-- The benchmark is calculated retrospectively from the same observation window; it has not yet been validated on an independent holdout period.
-- MOVER shifts dates separately for each patient. Within-case durations remain usable, but cross-patient calendar analysis such as seasonality, day-of-week patterns, and year-over-year trends is not valid.
-- Procedures with fewer than 30 qualifying cases are excluded, so the results do not represent every procedure in the source data.
-- The 5.75-year annualization period and the $35/$60 per-minute rates are fixed assumptions.
-- The analysis identifies where variation occurs, not why it occurs. It does not demonstrate that the variation was avoidable or that the estimated cost exposure can be recovered.
-
-## Recommendations
-
-1. **Begin with high-exposure, low-reliability procedures.** Use the dashboard's prioritization view to find procedures that combine substantial annualized variation, a high share of cases outside ±30 minutes, and enough volume to make review worthwhile.
-2. **Review benchmarks as a repeatable process.** Because exposure is distributed across many procedures, establish a regular benchmark-review cycle instead of correcting only the largest outlier.
-3. **Keep reliability and volume separate in operational decisions.** High accumulated exposure does not automatically mean poor per-case predictability.
-4. **Validate before changing scheduling policy.** Test revised benchmarks on a later or independent sample and compare them with actual booked durations when schedule data becomes available.
-5. **Treat financial estimates as planning scenarios.** Use organization-specific cost assumptions before applying the exposure figures to budgeting or savings targets.
-
-## Future scope
-
-- Test whether patient acuity, anesthesia type, patient class, and other case characteristics explain differences in predictability.
-- Validate historical-median benchmarks on a holdout period or independent perioperative dataset.
-- Incorporate actual booked start times and planned durations to measure true scheduling accuracy.
-- Add interactive cost-per-minute assumptions and scenario controls to the Power BI report.
-- Extend the model with procedure events, patient history, and post-operative outcomes where they support clearly defined analytical questions.
-- Add role-based access and service-line views if the solution moves toward operational use.
-
-## Supporting documentation
-
-- [Data quality and feature engineering](DATA_QUALITY.md)
-- [Data lineage](DATA_LINEAGE.md)
-- [Power BI dashboard guide](DASHBOARD_GUIDE.md)
-- [Analytical and implementation notes](PROJECT_NOTES.md)
-
-## Tech stack
-
-- **Microsoft Fabric:** Lakehouse, Spark notebooks, PySpark, Spark SQL, and Delta Lake
-- **Power BI Desktop:** Import-mode semantic model, DAX measures, interactive report design, and PBIP source format
-- **Development:** SQL, Python, Git, and GitHub
-
-## Project boundary
-
-This project demonstrates data engineering, analytical modeling, data validation, and BI reporting. It supports investigation and prioritization; it does not claim that a scheduling intervention was implemented, that hospital performance improved, or that the estimated exposure is fully recoverable.
+```text
+OR-Scheduling-Reliability-Analytics/
+├── README.md
+├── .gitignore
+├── .nojekyll
+├── index.html                         # Live-site entry point
+├── assets/
+│   └── OR_OVERVIEW.png                # Power BI overview image
+├── dashboard/
+│   └── index.html                     # Self-contained interactive dashboard
+├── dashboard-data/
+│   ├── How often do case times miss the benchmark.csv
+│   ├── Where should scheduling review begin.csv
+│   ├── Which procedures deserve a closer look.csv
+│   ├── README.md                      # Export scope and refresh limitations
+│   └── OR-dashboard.html              # Redirect preserving the previous URL
+├── docs/
+│   ├── DASHBOARD_GUIDE.md
+│   ├── DATA_LINEAGE.md
+│   ├── DATA_QUALITY.md
+│   └── SETUP.md
+├── notebooks/
+│   ├── 01_bronze_ingest.ipynb
+│   ├── 02_silver_patient_information.ipynb
+│   └── 03_gold.ipynb
+└── powerbi/
+    ├── OR_Scheduling_Reliability.pbip
+    ├── OR_Scheduling_Reliability.Report/
+    │   ├── .platform
+    │   ├── definition.pbir
+    │   ├── definition/               # Pages, visuals, and report settings
+    │   └── StaticResources/          # Referenced theme
+    └── OR_Scheduling_Reliability.SemanticModel/
+        ├── .platform
+        ├── definition.pbism
+        ├── definition/               # TMDL tables, DAX, and relationships
+        └── diagramLayout.json
+```

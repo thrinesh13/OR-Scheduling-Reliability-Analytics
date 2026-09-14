@@ -140,7 +140,11 @@ The case table supplies portfolio-level counts, averages, medians, and timing ou
 
 ## Planned lineage extensions
 
-- Add column-level lineage for DAX measures after the final semantic-model source files are committed.
+- Extend column-level lineage using the committed TMDL definitions in `powerbi/OR_Scheduling_Reliability.SemanticModel/definition/`.
 - Add refresh timestamps, run identifiers, and source file metadata to Bronze.
 - Extend the diagram only when the history, events, or complications tables support a defined and validated analytical question.
 - Add actual booked-duration data if available, creating a direct lineage path for true schedule-adherence measures.
+
+## Public dashboard lineage
+
+The self-contained [web dashboard](../dashboard/index.html) contains procedure summaries and grouped case-count distributions derived from the final Power BI model snapshot. The three [CSV exports](../dashboard-data/) provide supporting visual-level exports; they are not sufficient alone to reconstruct exact filtered medians. Updating those CSVs does not automatically refresh the HTML dashboard.

@@ -1,0 +1,18 @@
+# Power BI local cache and personal settings
+**/.pbi/
+
+# Notebook checkpoints and Python caches
+**/.ipynb_checkpoints/
+**/__pycache__/
+*.py[cod]
+.venv/
+
+# Local secrets and temporary files
+.env
+.env.*
+!.env.example
+*.tmp
+*.bak
+~$*
+.DS_Store
+Thumbs.db

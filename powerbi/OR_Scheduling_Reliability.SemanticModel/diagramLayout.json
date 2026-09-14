@@ -1,0 +1,48 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 434,
+            "y": 0
+          },
+          "nodeIndex": "gold fact_cases",
+          "nodeLineageTag": "d3eb5008-728d-4b37-9759-8f2f412a3eae",
+          "size": {
+            "height": 602,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 0,
+            "y": 41
+          },
+          "nodeIndex": "gold procedure_baseline",
+          "nodeLineageTag": "9013e122-7063-4fce-accf-4964ce8bec3a",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 1
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 77.925531914893625,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

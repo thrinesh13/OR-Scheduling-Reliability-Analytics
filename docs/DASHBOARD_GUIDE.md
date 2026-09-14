@@ -79,3 +79,11 @@ Annual estimates depend on the fixed observation-period and cost assumptions. So
 
 - Explore variation by relevant case characteristics, such as anesthesia type or patient acuity.
 - Test benchmarks on independent data.
+
+## Public web version
+
+**[Open the live dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)** — no Power BI sign-in is required.
+
+The browser version recreates the report overview using an embedded, fixed data snapshot. Review context, procedure selection, and timing buckets support interactive exploration. Case KPIs follow the selected case distribution; procedure benchmarks and procedure-level reliability metrics retain their original cohort definitions. Clear selections to return to the full cohort.
+
+**This is an HTML recreation, not an embedded Power BI service report.** Browser controls, fonts, and bubble sizing can differ. It does not refresh from Fabric, and changing the supporting CSV files will not update the embedded snapshot.

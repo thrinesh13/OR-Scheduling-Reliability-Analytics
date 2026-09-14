@@ -1,0 +1,354 @@
+table 'gold fact_cases'
+	lineageTag: d3eb5008-728d-4b37-9759-8f2f412a3eae
+
+	/// Count of case-level records in the analytical cohort (cases with a usable OR duration, joined to a procedure baseline with at least 30 qualifying cases).
+	measure 'Total Cases' = COUNTROWS('gold fact_cases')
+		formatString: #,##0
+		displayFolder: Portfolio Reliability
+		lineageTag: e9e60f78-7139-40ea-a48d-9f31481e41bd
+
+	/// Number of distinct procedures represented in the case-level fact table. Matches gold procedure_baseline's row count (418), confirming full join coverage with no unmatched procedure keys.
+	measure 'Distinct Procedures' = DISTINCTCOUNT('gold fact_cases'[procedure_nm])
+		formatString: #,##0
+		displayFolder: Portfolio Reliability
+		lineageTag: e71cd38b-ac01-4ba4-b248-b8c9e4b3d5fb
+
+	/// Average absolute deviation, in minutes, between actual OR duration and the procedure's historical median baseline. Computed directly across all cases, not as an average of per-procedure MAE values.
+	measure 'Mean Absolute Error (min)' = AVERAGE('gold fact_cases'[abs_error_min])
+		formatString: #,##0.0
+		displayFolder: Portfolio Reliability
+		lineageTag: bd898a8f-3cd8-4708-967b-f4a723c72d9c
+
+	/// Median absolute deviation, in minutes, between actual OR duration and the procedure's historical median baseline. Computed directly across all cases, not as an average of per-procedure medians.
+	measure 'Median Absolute Error (min)' = MEDIAN('gold fact_cases'[abs_error_min])
+		formatString: #,##0.0
+		displayFolder: Portfolio Reliability
+		lineageTag: 59078d43-1d1c-4b14-b203-47393f819415
+
+	/// Sum of case-level absolute deviation minutes across the full historical cohort. Basis for the annualized exposure estimates below.
+	measure 'Total Absolute Deviation (min)' = SUM('gold fact_cases'[abs_error_min])
+		formatString: #,##0
+		displayFolder: Cost Exposure
+		lineageTag: ad617479-71a2-4524-82b7-6e80275d02e5
+
+	/// Total absolute deviation minutes normalized to an annual rate, dividing by the 5.75 years of source data covered by the cohort.
+	measure 'Annualized Absolute Deviation (min)' = DIVIDE([Total Absolute Deviation (min)], 5.75)
+		formatString: #,##0
+		displayFolder: Cost Exposure
+		lineageTag: f0722418-0a07-49ad-9448-7acf671e4b85
+
+	/// Scenario estimate of annualized gross cost exposure from schedule deviation, assuming $35 of OR-time value per minute. A gross scenario estimate, not a projection of recoverable savings.
+	measure 'Annualized Gross Exposure @ $35/min' = [Annualized Absolute Deviation (min)] * 35
+		formatString: $#,##0
+		displayFolder: Cost Exposure
+		lineageTag: 59a0496f-3395-441d-8733-e14acae05b65
+
+	/// Scenario estimate of annualized gross cost exposure from schedule deviation, assuming $60 of OR-time value per minute. A gross scenario estimate, not a projection of recoverable savings.
+	measure 'Annualized Gross Exposure @ $60/min' = [Annualized Absolute Deviation (min)] * 60
+		formatString: $#,##0
+		displayFolder: Cost Exposure
+		lineageTag: 09d524d6-5d49-404e-870a-fcf0434193a7
+
+	/// Static footer caption text for the report canvas — the two durable definitional caveats only (benchmark definition + gross-exposure caveat). Interaction hints live next to their own controls instead (e.g. the timing-outcome chart's own title) so this stays short enough to render on one line. A textbox visual with this content silently failed to render in this Desktop build; a card visual bound to a text measure is the reliable fallback confirmed working throughout this session.
+	measure 'Footer Note' = "Benchmark = each procedure's own historical median duration, not a scheduled time  ·  Exposure figures are gross scenario estimates, not confirmed savings."
+		displayFolder: Portfolio Reliability
+		lineageTag: 5db5ede6-2294-44e8-a1f9-5e729e3d5028
+
+	/// Static report title text (main headline), rendered via a card visual — textbox visuals do not render in this Desktop build.
+	measure 'Title Main' = "OR Scheduling Reliability & Cost Exposure"
+		displayFolder: Portfolio Reliability
+		lineageTag: 6d07a3d5-61ca-40fc-b7c4-14fe51c7fc94
+
+	/// Static report title text (subhead), rendered via a card visual — textbox visuals do not render in this Desktop build.
+	measure 'Title Sub' = "See how often procedure times vary, what that variation represents in cost, and where to review first."
+		displayFolder: Portfolio Reliability
+		lineageTag: f971a469-5f88-4896-a9d5-178d78b93868
+
+	/// Share of cases in the current Timing Outcome bucket, as a percentage of whatever cohort is currently in view. Removes only the Timing Outcome bucket's own filter (not any active procedure/Review Focus/search selection), so the denominator reflects the full cohort in view without the per-bucket narrowing a bidirectional relationship would otherwise introduce. Kept for tooltip use; the timing-outcome chart itself now gets its percentages natively from the 100% Stacked Bar Chart's own stacking calculation, bound to Total Cases, rather than from this measure.
+	measure '% of Cases (Timing Outcome)' =
+			VAR CurrentCount = COUNTROWS('gold fact_cases')
+			VAR TotalCount = CALCULATE(COUNTROWS('gold fact_cases'), REMOVEFILTERS('gold fact_cases'[Timing Outcome]))
+			RETURN DIVIDE(CurrentCount, TotalCount)
+		formatString: 0.0%
+		displayFolder: Portfolio Reliability
+		lineageTag: f327ab77-eed2-4c4a-8dc4-ffe3587b7dd4
+
+	column log_id
+		dataType: string
+		lineageTag: b4c34ba8-aa41-4f7b-a1b6-8dc1a6206adb
+		summarizeBy: none
+		sourceColumn: log_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column mrn
+		dataType: string
+		lineageTag: ab85e680-f7c2-4a32-8f46-aab8c8751d8d
+		summarizeBy: none
+		sourceColumn: mrn
+
+		annotation SummarizationSetBy = Automatic
+
+	column disch_disp
+		dataType: string
+		lineageTag: 6d92860d-c5bf-433d-85ca-8199273b78d8
+		summarizeBy: none
+		sourceColumn: disch_disp
+
+		annotation SummarizationSetBy = Automatic
+
+	column age_years
+		dataType: int64
+		formatString: 0
+		lineageTag: d7f4f551-03e5-4bfb-aa8b-125b7aff7fbc
+		summarizeBy: sum
+		sourceColumn: age_years
+
+		annotation SummarizationSetBy = Automatic
+
+	column sex
+		dataType: string
+		lineageTag: 9e56a43f-6bbd-4cd3-b6dc-a285a9788b50
+		summarizeBy: none
+		sourceColumn: sex
+
+		annotation SummarizationSetBy = Automatic
+
+	column primary_anes_type_nm
+		dataType: string
+		lineageTag: 7505f978-1136-45c3-bd99-a20170673fdf
+		summarizeBy: none
+		sourceColumn: primary_anes_type_nm
+
+		annotation SummarizationSetBy = Automatic
+
+	column asa_rating
+		dataType: string
+		lineageTag: 48df63f3-deb8-45bf-a025-b3b12c366d6d
+		summarizeBy: none
+		sourceColumn: asa_rating
+
+		annotation SummarizationSetBy = Automatic
+
+	column patient_class_group
+		dataType: string
+		lineageTag: d10b3647-3656-4cc0-a437-213382584a50
+		summarizeBy: none
+		sourceColumn: patient_class_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column patient_class_nm
+		dataType: string
+		lineageTag: 61e6f78c-0a30-4361-95dc-2c3070f357e9
+		summarizeBy: none
+		sourceColumn: patient_class_nm
+
+		annotation SummarizationSetBy = Automatic
+
+	column log_id_corrupt
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 1ca53a35-5380-4355-ac1f-c668d5f20bf6
+		summarizeBy: none
+		sourceColumn: log_id_corrupt
+
+		annotation SummarizationSetBy = Automatic
+
+	column mrn_corrupt
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 90b2d645-d1e3-4b67-a524-70c354eb6e3b
+		summarizeBy: none
+		sourceColumn: mrn_corrupt
+
+		annotation SummarizationSetBy = Automatic
+
+	column in_or
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: e59eb5f8-96e1-4155-a51c-364ca5ba8df4
+		summarizeBy: none
+		sourceColumn: in_or
+
+		annotation SummarizationSetBy = Automatic
+
+	column or_duration_min
+		dataType: int64
+		formatString: 0
+		lineageTag: f4731b25-158e-4843-8494-445a4b5397fd
+		summarizeBy: sum
+		sourceColumn: or_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
+	column out_or_repaired_flag
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 704c3f84-018c-4e39-8f2c-1394bb3a219d
+		summarizeBy: none
+		sourceColumn: out_or_repaired_flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column in_or_repaired_flag
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: d1ca4451-459f-4a06-8247-069be7d8d646
+		summarizeBy: none
+		sourceColumn: in_or_repaired_flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column procedure_nm
+		dataType: string
+		lineageTag: 2ecd2cf9-9277-4afc-8425-75ad9834aa1b
+		summarizeBy: none
+		sourceColumn: procedure_nm
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_compound_name
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 47113cf2-4010-45bb-b30b-1aa3e464147e
+		summarizeBy: none
+		sourceColumn: is_compound_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column los_days
+		dataType: double
+		lineageTag: 4ac75b6e-d684-44db-8fb8-b65b8ea5e569
+		summarizeBy: sum
+		sourceColumn: los_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column icu_admit
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 849fca33-07ab-45ac-96b4-0897b31ca020
+		summarizeBy: none
+		sourceColumn: icu_admit
+
+		annotation SummarizationSetBy = Automatic
+
+	column start_hour
+		dataType: int64
+		formatString: 0
+		lineageTag: 095b8049-82d7-42eb-9656-fb0c02e481a6
+		summarizeBy: sum
+		sourceColumn: start_hour
+
+		annotation SummarizationSetBy = Automatic
+
+	column expected_duration_min
+		dataType: double
+		lineageTag: d0d565f2-0798-424a-9335-cbcc19134a37
+		summarizeBy: sum
+		sourceColumn: expected_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column schedule_error_min
+		dataType: double
+		lineageTag: 60b23def-6b92-47ca-99f3-ad4e5b258955
+		summarizeBy: sum
+		sourceColumn: schedule_error_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column abs_error_min
+		dataType: double
+		lineageTag: a8bc39b4-e586-442f-91cc-500d211239b3
+		summarizeBy: sum
+		sourceColumn: abs_error_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column overrun_30
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 24ca7418-98ef-41ff-9ec3-78f5c85ebd2b
+		summarizeBy: none
+		sourceColumn: overrun_30
+
+		annotation SummarizationSetBy = Automatic
+
+	column overrun_60
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: cb163199-5ec0-4009-ad2d-01e53a2bc81b
+		summarizeBy: none
+		sourceColumn: overrun_60
+
+		annotation SummarizationSetBy = Automatic
+
+	column early_30
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 62f04153-8d51-4c7a-a1a8-32e04ca6b98d
+		summarizeBy: none
+		sourceColumn: early_30
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Disjoint, click-to-filter timing category for each case, evaluated in a fixed order so every case lands in exactly one bucket (a >60-min-late case is never also counted as >30-min-late): Late by more than 60 min, Late by 30-60 min, Early by more than 30 min, or Within 30 min either way. Drives the interactive timing-outcome bar chart; selecting a bucket filters the scatter, table, and portfolio cards via the case-to-procedure relationship.
+	column 'Timing Outcome' =
+			SWITCH(
+			    TRUE(),
+			    'gold fact_cases'[overrun_60] = TRUE(), "Late by more than 60 min",
+			    'gold fact_cases'[overrun_30] = TRUE(), "Late by 30-60 min",
+			    'gold fact_cases'[early_30] = TRUE(), "Early by more than 30 min",
+			    "Within 30 min either way"
+			)
+		lineageTag: ddb8fd1c-7f4e-484e-a408-b5e03f8b49a7
+		summarizeBy: none
+		sortByColumn: 'Timing Outcome Sort'
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Hidden sort key for Timing Outcome, ordering buckets from earliest to latest (1=Early, 2=Within, 3=Late 30-60, 4=Late 60+) instead of alphabetically. Mirrors Timing Outcome's own branch order so every case sorts consistently with its category.
+	column 'Timing Outcome Sort' =
+			SWITCH(
+			    TRUE(),
+			    'gold fact_cases'[overrun_60] = TRUE(), 4,
+			    'gold fact_cases'[overrun_30] = TRUE(), 3,
+			    'gold fact_cases'[early_30] = TRUE(), 1,
+			    2
+			)
+		isHidden
+		formatString: 0
+		lineageTag: 0aad9279-c977-4c86-ab49-4d1e3fdaf3d0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Constant label used only as the (required) Category/axis field for the timing-outcome 100% Stacked Bar Chart, so all cases collapse into a single bar segmented by Timing Outcome (via Series) instead of one bar per bucket.
+	column Cohort = "All Cases"
+		dataType: string
+		lineageTag: c2e6a319-4b6a-4b3a-9b1a-2f7a6c8d9e10
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'gold fact_cases' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("opu254nl33zulpqake74kewhge-2avfjyg5adkebmenf26ohq4cmq.datawarehouse.fabric.microsoft.com", "moverdata"),
+				    gold_fact_cases = Source{[Schema="gold",Item="fact_cases"]}[Data]
+				in
+				    gold_fact_cases
+
+	annotation PBI_ResultType = Table
+

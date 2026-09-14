@@ -118,7 +118,7 @@ The middle 50% of cases ranged from −10 to −6 minutes, with a median of −7
 
 The five `in_or` repairs include the negative-duration case. All changes are traceable through `out_or_repaired_flag` and `in_or_repaired_flag`.
 
-One record, `8338d2b6d17feea0`, showed an OR duration of 1,367 minutes and an anesthesia duration of 47 minutes. It did not match a defensible repair pattern, so it was excluded rather than modified.
+One record showed an OR duration of 1,367 minutes and an anesthesia duration of 47 minutes. It did not match a defensible repair pattern, so it was excluded rather than modified.
 
 A small number of other cases, including tunneled catheter placements, had anesthesia timestamps substantially misaligned with OR timestamps. They were not used as evidence for timestamp repair because the relationship was unclear.
 
@@ -196,17 +196,13 @@ The Gold output contains 418 procedure baselines and 48,118 case records. Total 
 
 ## Power BI data and model issues
 
-### Percentage denominator issue
+### Timing percentages in the final report
 
-The timing-outcome categories contain mutually exclusive case counts that reconcile to 48,118. In the current report implementation, the on-screen category percentages can sum to approximately 100.7% because a bidirectional relationship changes the comparison base slightly by category.
+An earlier version calculated displayed timing percentages using a measure whose denominator could change through bidirectional filtering. **The final report uses a native 100% stacked bar bound to `Total Cases`**, so the bar normalizes the mutually exclusive bucket counts.
 
-The headline percentages in the README and dashboard guide are calculated from the reconciled case counts, not from the affected displayed percentages.
+The older `% of Cases (Timing Outcome)` measure remains in the semantic model for tooltip use. Its behavior under combined selections should still be checked before reusing it elsewhere; the native bar does not rely on it.
 
-Recommended correction:
-
-1. Replace the bidirectional relationship with single-direction filtering where possible.
-2. Re-test cross-filtering between the case table, procedure table, timing chart, and procedure selections.
-3. Validate every percentage against the 48,118-row case-level denominator.
+The public HTML dashboard calculates timing shares from the selected case-count distribution. The full-cohort counts are **11,339 / 22,481 / 5,077 / 9,221**, summing to **48,118**. Rounded percentages total 99.99%.
 
 ### Grain control
 
@@ -222,15 +218,15 @@ MOVER applies patient-specific date shifts. Duration calculations within a case 
 - Enforce or quarantine the `log_id_corrupt` and `mrn_corrupt` flags before future joins.
 - Add Bronze schema contracts, malformed-row handling, ingestion metadata, and schema-drift monitoring.
 - Resolve and document the role of every staged Bronze table before bringing it into the analytical model.
-- Correct and regression-test the Power BI percentage denominator behavior.
+- Regression-test the retained tooltip percentage measure under combined Power BI selections.
 - Validate the historical-median benchmark on a holdout period or independent dataset.
 
 ## Reproducibility
 
 The evidence and transformations summarized here are implemented in:
 
-- [`01_bronze_ingest.ipynb`](01_bronze_ingest.ipynb)
-- [`02_silver_patient_information.ipynb`](02_silver_patient_information.ipynb)
-- [`03_gold.ipynb`](03_gold.ipynb)
+- [`01_bronze_ingest.ipynb`](../notebooks/01_bronze_ingest.ipynb)
+- [`02_silver_patient_information.ipynb`](../notebooks/02_silver_patient_information.ipynb)
+- [`03_gold.ipynb`](../notebooks/03_gold.ipynb)
 
 This document summarizes the decisions; the notebooks remain the executable record.

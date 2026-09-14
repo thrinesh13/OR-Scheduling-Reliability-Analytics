@@ -1,0 +1,204 @@
+table 'gold procedure_baseline'
+	lineageTag: 9013e122-7063-4fce-accf-4964ce8bec3a
+
+	/// Per-procedure annualized absolute deviation, in minutes per year, on the same 5.75-year annualization basis as the portfolio figure. Evaluates one procedure at a time when Procedure is on the visual (X axis of the reliability-vs-exposure quadrant).
+	measure 'Annualized Deviation (Procedure)' = DIVIDE(SUM('gold procedure_baseline'[total_deviation_min]), 5.75)
+		formatString: #,##0
+		displayFolder: Procedure Scorecard
+		lineageTag: cb4422ce-2a85-424a-959d-c7aa7a21f06d
+
+	/// Per-procedure share of cases finishing more than 30 minutes from baseline, in either direction — same definition as the portfolio % Outside ±30 Min measure, evaluated per procedure (Y axis of the reliability-vs-exposure quadrant).
+	measure '% Outside ±30 Min (Procedure)' = DIVIDE(AVERAGE('gold procedure_baseline'[pct_outside_30]), 100)
+		formatString: 0.0%
+		displayFolder: Procedure Scorecard
+		lineageTag: ea232398-7f42-4b0c-8418-4510911f12f6
+
+	/// Unweighted median of annualized deviation across all 418 procedures in the cohort (each procedure counted once, regardless of case volume). Uses ALL() so it stays fixed regardless of any procedure selection — a relative reference line, not a target.
+	measure 'Cohort Median – Annualized Deviation' = MEDIANX(ALL('gold procedure_baseline'), DIVIDE('gold procedure_baseline'[total_deviation_min], 5.75))
+		formatString: #,##0
+		displayFolder: Procedure Scorecard
+		lineageTag: c908d165-65a1-4938-a4b9-3130b4e08a89
+
+	/// Unweighted median of % Outside ±30 Min across all 418 procedures in the cohort. Uses ALL() so it stays fixed regardless of any procedure selection — a relative reference line, not a target.
+	measure 'Cohort Median – % Outside ±30' = DIVIDE(MEDIANX(ALL('gold procedure_baseline'), 'gold procedure_baseline'[pct_outside_30]), 100)
+		formatString: 0.0%
+		displayFolder: Procedure Scorecard
+		lineageTag: 7f7af978-7817-464f-93c4-d9a593c980fb
+
+	/// Case count for the procedure in context. Used as the table's Cases column and the quadrant's bubble size, so both read from the same measure.
+	measure 'Cases (Procedure)' = SUM('gold procedure_baseline'[case_count])
+		formatString: #,##0
+		displayFolder: Procedure Scorecard
+		lineageTag: 0c8ca84e-4a26-49e6-8bb9-6eaa598e4cfd
+
+	column Procedure
+		dataType: string
+		lineageTag: b6b38bc6-c17e-47c7-b618-1cc1254eeaa6
+		summarizeBy: none
+		sourceColumn: procedure_nm
+
+		annotation SummarizationSetBy = Automatic
+
+	column case_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 66df36d1-ab2a-4eb0-87aa-ca04580ce46e
+		summarizeBy: none
+		sourceColumn: case_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Historical Benchmark (min)'
+		dataType: double
+		formatString: #,##0
+		lineageTag: 4b0b3434-31ea-4fb3-b699-05d2d13eae5c
+		summarizeBy: none
+		sourceColumn: expected_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mean_duration_min
+		dataType: double
+		lineageTag: 24cb9eee-8617-4b69-b307-8820cc382452
+		summarizeBy: none
+		sourceColumn: mean_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column stdev_duration_min
+		dataType: double
+		lineageTag: c865e304-8119-44fc-a08b-8724abe82acf
+		summarizeBy: none
+		sourceColumn: stdev_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cv
+		dataType: double
+		lineageTag: b9ea22b6-986b-46b0-a24a-628f00fb6b0b
+		summarizeBy: none
+		sourceColumn: cv
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column or_hours_consumed
+		dataType: double
+		lineageTag: a07de0ee-d417-41a0-8a66-e741d97a21cc
+		summarizeBy: none
+		sourceColumn: or_hours_consumed
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mae_min
+		dataType: double
+		lineageTag: 957f13ad-4efe-4e06-8068-d07425774e25
+		summarizeBy: none
+		sourceColumn: mae_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column median_abs_error_min
+		dataType: double
+		lineageTag: 710aac82-36f1-4fb5-9f78-e1d8f40cd112
+		summarizeBy: none
+		sourceColumn: median_abs_error_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_outside_30
+		dataType: double
+		lineageTag: d8b0f250-a805-4d73-8463-9c963aff2c15
+		summarizeBy: none
+		sourceColumn: pct_outside_30
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_overrun_30
+		dataType: double
+		lineageTag: 1be8227e-f399-45e5-92fe-164c28af88e5
+		summarizeBy: none
+		sourceColumn: pct_overrun_30
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_early_30
+		dataType: double
+		lineageTag: 5f4d892e-c95d-4ee7-8e45-bc23d4037f5c
+		summarizeBy: none
+		sourceColumn: pct_early_30
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_deviation_min
+		dataType: double
+		lineageTag: 2aa609f3-7152-4302-ae21-3419ef60b7df
+		summarizeBy: none
+		sourceColumn: total_deviation_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Two-value classification, calculated per row so it can be used as chart legend/color: procedures at or above the cohort median on both annualized deviation and % outside ±30, versus everything else.
+	column 'Review Flag' =
+			SWITCH(
+			    TRUE(),
+			    DIVIDE('gold procedure_baseline'[total_deviation_min], 5.75) >= [Cohort Median – Annualized Deviation]
+			        && DIVIDE('gold procedure_baseline'[pct_outside_30], 100) >= [Cohort Median – % Outside ±30],
+			    "Higher exposure / lower reliability",
+			    "Other review contexts"
+			)
+		lineageTag: f0d3a5aa-2f6e-4a1a-9e7e-6e6b7c1e9a11
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Action-oriented classification of each procedure against the cohort median on both axes (exposure = annualized deviation, reliability = % outside ±30 min), calculated per row. Each label is paired with a short plain-language description after the slash. "Prioritize review" = at/above median on both dimensions, the highest-priority combination. Relative to this 418-procedure cohort, not a clinical or performance target.
+	column 'Review Context' =
+			SWITCH(
+			    TRUE(),
+			    DIVIDE('gold procedure_baseline'[total_deviation_min], 5.75) >= [Cohort Median – Annualized Deviation]
+			        && DIVIDE('gold procedure_baseline'[pct_outside_30], 100) >= [Cohort Median – % Outside ±30],
+			    "Prioritize review / high exposure, unreliable",
+			    DIVIDE('gold procedure_baseline'[total_deviation_min], 5.75) >= [Cohort Median – Annualized Deviation],
+			    "Review exposure / high exposure, reliable",
+			    DIVIDE('gold procedure_baseline'[pct_outside_30], 100) >= [Cohort Median – % Outside ±30],
+			    "Review variability / low exposure, unreliable",
+			    "Monitor / low exposure, reliable"
+			)
+		lineageTag: 5b87c857-dd2b-41eb-9b1e-dd40b638f79c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'gold procedure_baseline' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("opu254nl33zulpqake74kewhge-2avfjyg5adkebmenf26ohq4cmq.datawarehouse.fabric.microsoft.com", "moverdata"),
+				    gold_procedure_baseline = Source{[Schema="gold",Item="procedure_baseline"]}[Data]
+				in
+				    gold_procedure_baseline
+
+	annotation PBI_ResultType = Table
+
