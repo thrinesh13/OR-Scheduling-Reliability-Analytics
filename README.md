@@ -2,7 +2,7 @@
 
 > **From perioperative data to scheduling decisions.** I used Microsoft Fabric, PySpark, SQL, and Power BI to build a pipeline and interactive report that compare actual operating-room (OR) durations with historical procedure benchmarks. The result helps identify procedures that warrant scheduling review.
 
-**[Explore the live dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)** · [Open the Power BI project](powerbi/OR_Scheduling_Reliability.pbip)
+**[Explore the live dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)** · [Explore the Power BI source and opening instructions](powerbi/README.md)
 
 ![Power BI dashboard overview](assets/OR_OVERVIEW.png)
 
@@ -71,6 +71,7 @@ The final cohort has **48,118 qualifying cases across 418 procedures**. Procedur
 | **[Data lineage](docs/DATA_LINEAGE.md)** | Source-to-Bronze-to-Silver-to-Gold flow, table dependencies, and metric origins |
 | **[Setup and reproduction](docs/SETUP.md)** | How to open the PBIP project and what authorized source access is needed to refresh it |
 | **[Transformation notebooks](notebooks/)** | The executable Bronze, Silver, and Gold logic |
+| **[Power BI source](powerbi/README.md)** | What the report and model folders contain, plus how to open the project |
 
 **The live dashboard is a fixed, self-contained snapshot.** Refreshing Fabric or replacing the three supporting CSV exports does not automatically update it.
 
