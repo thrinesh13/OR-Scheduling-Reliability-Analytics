@@ -79,5 +79,3 @@ OR-Scheduling-Reliability-Analytics/
 ├── notebooks/                  # Bronze → Silver → Gold transformations
 └── powerbi/                    # PBIP launcher, Report, and SemanticModel
 ```
-
-**Why there are multiple HTML files:** `dashboard/index.html` contains the dashboard. The root `index.html` sends the short live URL there. `dashboard-data/OR-dashboard.html` is a small redirect that keeps the earlier shared URL working; it contains no second dashboard.
