@@ -6,7 +6,7 @@
 
 **No sign-in or Power BI license is needed to explore the web dashboard.**
 
-[Dashboard guide](docs/DASHBOARD_GUIDE.md) · [Data quality](docs/DATA_QUALITY.md) · [Data lineage](docs/DATA_LINEAGE.md) · [Run the project](docs/SETUP.md)
+[Dashboard guide](docs/DASHBOARD_GUIDE.md) · [Data quality](docs/DATA_QUALITY.md) · [Data lineage](docs/DATA_LINEAGE.md)
 
 ![Power BI report overview](assets/OR_OVERVIEW.png)
 
@@ -67,8 +67,6 @@ The source is **[MOVER](https://doi.org/10.24432/C5VS5G)**, the Medical Informat
 | Procedure events | 640,223 | Staged for future work |
 | Post-operative complications | 203,945 | Staged for future work |
 
-**Only patient information contributes to the current dashboard.** The 1.88M staged records are not 1.88M surgical cases.
-
 Silver contains **64,353** cleaned records. Gold retains qualifying cases with usable OR timestamps, durations of **10–720 minutes**, and procedures supported by **at least 30 cases**, producing the 48,118-case analytical cohort.
 
 Reference: Samad et al. (2023), [MOVER: a public-access operating room database](https://doi.org/10.1093/jamiaopen/ooad084), *JAMIA Open*.
@@ -114,16 +112,6 @@ flowchart LR
 - **Descriptive findings:** The analysis identifies where variation occurs; it does not establish causes or demonstrate savings.
 
 **Next steps:** Validate benchmarks on independent data, investigate relevant case characteristics, and incorporate actual booked durations before evaluating scheduling interventions.
-
-## Open or reproduce the project
-
-**For visitors:** [Open the live dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/).
-
-**For Power BI users:** Download or clone the repository and open [`powerbi/OR_Scheduling_Reliability.pbip`](powerbi/OR_Scheduling_Reliability.pbip) in a current compatible Power BI Desktop version. Keep its adjacent report and semantic-model folders together.
-
-**For refresh or rebuilding:** Follow [setup instructions](docs/SETUP.md). You need authorized source access and your own configured Fabric environment. **The Power BI cache is intentionally excluded**, so a fresh checkout needs a data refresh; the web dashboard works independently.
-
-Notebook source and transformation logic are retained; saved outputs, execution state, and workspace attachment metadata are removed. Supporting CSV exports retain their original filenames and values. Updating those CSVs alone does not rebuild the web dashboard.
 
 ## Project structure
 
