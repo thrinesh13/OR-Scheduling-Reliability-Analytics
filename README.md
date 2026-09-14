@@ -61,7 +61,7 @@ The data was processed in a Fabric Lakehouse using a medallion design:
 | Silver | Standardize fields, resolve duplicates, validate timestamps, and retain flags for repaired values | One analysis-ready row per surgical case |
 | Gold | Apply cohort rules, calculate procedure benchmarks, and derive case-level reliability measures | `gold.procedure_baseline` and `gold.fact_cases` |
 
-The detailed timestamp investigations, repair rules, validation results, and record-level exceptions will be documented separately in a dedicated data-quality file. End-to-end table and field movement will be documented separately in a lineage file.
+Detailed profiling, repair rules, validation evidence, and feature engineering are documented in [DATA_QUALITY.md](DATA_QUALITY.md). The source-to-dashboard flow and table dependencies are documented in [DATA_LINEAGE.md](DATA_LINEAGE.md).
 
 ### 2. Analytical model
 
@@ -146,21 +146,13 @@ Procedures can accumulate high total variation because they occur frequently, be
 - Add interactive cost-per-minute assumptions and scenario controls to the Power BI report.
 - Extend the model with procedure events, patient history, and post-operative outcomes where they support clearly defined analytical questions.
 - Add role-based access and service-line views if the solution moves toward operational use.
-- Create dedicated `DATA_QUALITY.md` and `DATA_LINEAGE.md` documentation for validation evidence, repair logic, exclusions, table lineage, and model dependencies.
 
-## Repository contents
+## Supporting documentation
 
-| File | Description |
-|---|---|
-| [`01_bronze_ingest.ipynb`](01_bronze_ingest.ipynb) | Raw source ingestion into Bronze Delta tables |
-| [`02_silver_patient_information.ipynb`](02_silver_patient_information.ipynb) | Cleaning, timestamp validation and repair, procedure-name standardization, and Silver table creation |
-| [`03_gold.ipynb`](03_gold.ipynb) | Cohort selection, procedure baselines, case-level measures, findings, and reconciliation checks |
-| [`OR_Scheduling_Reliability.pbip`](OR_Scheduling_Reliability.pbip) | Power BI Project entry file |
-| [`DASHBOARD_GUIDE.md`](DASHBOARD_GUIDE.md) | Dashboard purpose, metrics, interactions, and interpretation guidance |
-| [`PROJECT_NOTES.md`](PROJECT_NOTES.md) | Supporting analytical decisions and known implementation notes |
-| [`OR_OVERVIEW.png`](OR_OVERVIEW.png) | Dashboard preview used in this README |
-
-> GitHub does not render PBIP reports interactively. The screenshot and dashboard guide provide a browser-viewable portfolio preview, while the PBIP source is intended for Power BI Desktop and version control.
+- [Data quality and feature engineering](DATA_QUALITY.md)
+- [Data lineage](DATA_LINEAGE.md)
+- [Power BI dashboard guide](DASHBOARD_GUIDE.md)
+- [Analytical and implementation notes](PROJECT_NOTES.md)
 
 ## Tech stack
 
