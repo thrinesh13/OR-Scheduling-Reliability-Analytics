@@ -63,18 +63,7 @@ The three notebooks run in order: [Bronze ingestion](notebooks/01_bronze_ingest.
 
 ## Tech stack
 
-**Microsoft Fabric** (Lakehouse, Delta tables, SQL endpoint) · **PySpark and Spark SQL** · **Power BI and DAX** · **PBIP/PBIR and TMDL** · **HTML, CSS, and JavaScript** · **GitHub Pages**
-
-## Project flow
-
-```mermaid
-flowchart LR
-    A[MOVER source extracts] --> B[Fabric Bronze: raw tables]
-    B --> C[Fabric Silver: cleaned cases]
-    C --> D[Fabric Gold: cases and procedure benchmarks]
-    D --> E[Power BI model and report]
-    E --> F[Public dashboard snapshot]
-```
+**Microsoft Fabric** (Lakehouse, Delta tables, SQL endpoint) · **PySpark and Spark SQL** · **Power BI and DAX** · 
 
 The public dashboard is a **fixed, self-contained snapshot** of the final report overview. It does not refresh automatically when the Fabric model or CSV exports change.
 
