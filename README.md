@@ -65,9 +65,6 @@ The three notebooks run in order: [Bronze ingestion](notebooks/01_bronze_ingest.
 
 **Microsoft Fabric** (Lakehouse, Delta tables, SQL endpoint) · **PySpark and Spark SQL** · **Power BI and DAX** · 
 
-The public dashboard is a **fixed, self-contained snapshot** of the final report overview. It does not refresh automatically when the Fabric model or CSV exports change.
-
-For definitions and implementation detail, see the [dashboard guide](docs/DASHBOARD_GUIDE.md), [data-quality notes](docs/DATA_QUALITY.md), [data lineage](docs/DATA_LINEAGE.md), and [setup instructions](docs/SETUP.md).
 
 ## Project structure
 
