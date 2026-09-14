@@ -5,7 +5,7 @@
 ![PySpark](https://img.shields.io/badge/PySpark-Spark%20SQL-E25A1C?logo=apachespark&logoColor=white)
 ![GitHub Pages](https://img.shields.io/badge/Dashboard-Live-2EA44F?logo=githubpages&logoColor=white)
 
-An end-to-end Microsoft Fabric project that measures operating room (OR) scheduling reliability and cost exposure. It compares actual case durations against historical procedure benchmarks to flag which procedures need a scheduling review, and quantifies the cost of the variation.
+An end-to-end data analytics and BI development project built on Microsoft Fabric, analyzing operating room (OR) scheduling reliability and cost exposure. It compares actual case durations against historical procedure benchmarks to flag which procedures need a scheduling review, and quantifies the cost of the variation.
 
 **[View the live dashboard →](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)**
 
@@ -19,7 +19,7 @@ An end-to-end Microsoft Fabric project that measures operating room (OR) schedul
 
 ---
 
-## Approach
+## Overview
 
 OR time is limited and expensive. Cases that run much longer or shorter than expected create problems for room scheduling, staffing, and downstream planning. This analysis identifies which procedures vary the most, where that variation adds up to the highest cost, and where a review should start.
 
@@ -107,6 +107,19 @@ The benchmark is retrospective and has not been validated against a holdout set 
 | [Transformation notebooks](notebooks/) | The Bronze, Silver, and Gold logic |
 
 The live dashboard is a fixed snapshot. Refreshing Fabric or replacing the CSV exports in `dashboard-data/` does not update it automatically.
+
+---
+
+## Skills Demonstrated
+
+| Responsibility | How this project demonstrates it |
+|---|---|
+| **Data pipeline development** | Built a Bronze, Silver, and Gold pipeline in Microsoft Fabric using PySpark and SQL, covering ingestion, deduplication, and transformation logic. |
+| **Data quality and cleaning** | Profiled and repaired timestamp and identifier issues, and documented every checkpoint from 65,728 raw rows down to a validated 48,118-case cohort. |
+| **Data modeling** | Designed a case-level fact table and a procedure-level benchmark table, and built the semantic model relationship in Power BI. |
+| **BI reporting and DAX** | Authored DAX measures and an interactive Power BI report with review-category logic, filters, and KPI cards. |
+| **Business analysis** | Framed a scheduling reliability and cost-exposure question, quantified the impact, and translated findings into review recommendations. |
+| **Documentation** | Wrote data lineage, data quality, and dashboard-guide documentation supporting reproducibility and reviewer confidence. |
 
 ---
 
