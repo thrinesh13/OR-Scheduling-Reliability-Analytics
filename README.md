@@ -2,7 +2,7 @@
 
 **An end-to-end healthcare analytics project that uses Microsoft Fabric, PySpark, SQL, and Power BI to turn perioperative data into an interactive dashboard. It measures how actual operating-room durations differ from historical procedure benchmarks, helping identify procedures that warrant scheduling review.**
 
-**[Explore the live interactive dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)** · [View the Power BI project](powerbi/OR_Scheduling_Reliability.pbip)
+**[Explore the live interactive dashboard](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)**
 
 ![Power BI dashboard overview](assets/OR_OVERVIEW.png)
 
