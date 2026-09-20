@@ -1,143 +1,133 @@
 # OR Scheduling Reliability & Cost Exposure
 
 ![Microsoft Fabric](https://img.shields.io/badge/Microsoft%20Fabric-Lakehouse-0078D4?logo=microsoftazure&logoColor=white)
-![Power BI](https://img.shields.io/badge/Power%20BI-DAX-F2C811?logo=powerbi&logoColor=black)
+![Power BI](https://img.shields.io/badge/Power%20BI-TMDL%20%2B%20DAX-F2C811?logo=powerbi&logoColor=black)
 ![PySpark](https://img.shields.io/badge/PySpark-Spark%20SQL-E25A1C?logo=apachespark&logoColor=white)
-![GitHub Pages](https://img.shields.io/badge/Dashboard-Live-2EA44F?logo=githubpages&logoColor=white)
+![Live dashboard](https://img.shields.io/badge/Dashboard-Live-2EA44F?logo=githubpages&logoColor=white)
 
-An end-to-end data analytics and BI development project built on Microsoft Fabric, analyzing operating room (OR) scheduling reliability and cost exposure. It compares actual case durations against historical procedure benchmarks to flag which procedures need a scheduling review, and quantifies the cost of the variation.
+How far do operating room cases run from their own historical benchmark, where does that variation concentrate, and what does it cost?
 
-**[View the live dashboard →](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)**
+### **[Open the interactive dashboard →](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/)**
 
-![Power BI dashboard overview](assets/OR_OVERVIEW.png)
+No sign-in, no install. Static HTML reproduction of the Power BI report.
 
-### At a glance
+![Power BI report overview](assets/OR_OVERVIEW.png)
 
-| 48,118 | 418 | 46.7% | $15.8M to $27.1M |
+| 48,118 | 418 | 54.1 min | $15.8M to $27.1M |
 |:---:|:---:|:---:|:---:|
-| Qualifying cases | Procedures analyzed | Within ±30 min of benchmark | Annual gross exposure range |
+| Cases analyzed | Procedures | Mean absolute deviation | Annual gross exposure |
 
 ---
 
-## Overview
+## The finding
 
-OR time is limited and expensive. Cases that run much longer or shorter than expected create problems for room scheduling, staffing, and downstream planning. This analysis identifies which procedures vary the most, where that variation adds up to the highest cost, and where a review should start.
+Surgery is usually assumed to run late. Measuring both directions says something more useful.
 
-A Bronze, Silver, and Gold data pipeline in Microsoft Fabric feeds a Power BI semantic model and report. A public HTML version of the dashboard lets anyone explore the findings without a Power BI account.
+| Versus the procedure's historical median | Cases | Share |
+|---|---:|---:|
+| More than 30 min **early** | 11,339 | 23.6% |
+| Within ±30 min | 22,481 | 46.7% |
+| 30 to 60 min late | 5,077 | 10.5% |
+| More than 60 min late | 9,221 | 19.2% |
 
-The analysis keeps two questions separate:
+**Estimates are imprecise in both directions, by comparable amounts.** Fewer than half of all cases land inside a ±30 minute window.
 
-| Lens | What it measures | Why it matters |
+Overruns cost overtime and bumped cases. Early finishes cost idle staffed rooms. Only the first half is normally quantified.
+
+---
+
+## What's in here
+
+| Path | What it is | How to open |
 |---|---|---|
-| **Reliability** | Share of a procedure's cases that fall more than ±30 minutes from its historical benchmark | Shows how predictable a typical case is |
-| **Exposure** | Total absolute time difference across all cases for a procedure, annualized | Shows where variation adds up at scale |
+| [`index.html`](index.html) | Interactive dashboard, self-contained | [In a browser](https://thrinesh13.github.io/OR-Scheduling-Reliability-Analytics/) |
+| [`powerbi/`](powerbi/) | PBIP project: semantic model as TMDL, report as PBIR, all DAX in plain text | Readable on GitHub. To open in Desktop, see [`powerbi/MODEL_REFERENCE.md`](powerbi/MODEL_REFERENCE.md) |
+| [`notebooks/`](notebooks/) | Bronze, Silver and Gold transformations | Readable on GitHub. Runs in Fabric against your own MOVER copy |
+| [`docs/`](docs/) | Modeling, data-quality and lineage decisions | Readable on GitHub |
 
-A procedure can have high exposure without being unreliable. A common procedure can accumulate a lot of total variation even when most of its individual cases are close to benchmark.
+> The dashboard is a **reproduction**, not an embedded Power BI report. It carries a fixed aggregate snapshot and does not refresh from Fabric.
+>
+> Power BI's Publish to web needs a live Pro or PPU licence, so a hosted link dies when a trial lapses. This one does not.
 
 ---
 
-## The data
-
-> **Note:** The data does not include the duration originally booked for each case. "Expected" duration here means the historical median for that procedure, not the scheduled time slot. This measures predictability against history, not schedule adherence.
-
-The source is [MOVER](https://doi.org/10.24432/C5VS5G), a de-identified perioperative dataset from UC Irvine Medical Center. Access requires a data-use agreement, so the raw records are not included in this repository.
-
-Four source tables were staged, totaling about 1.88 million records. Only the patient information table feeds the current analysis. The procedure-history, procedure-event, and complication tables are staged for possible future work.
-
-The pipeline works in three layers:
-
-1. **Bronze** preserves the four source extracts as Delta tables and checks ingestion counts.
-2. **Silver** cleans the patient information records, resolves duplicates, standardizes procedure names, and flags timestamp issues.
-3. **Gold** applies eligibility rules and builds a case-level fact table and a procedure-level benchmark table.
-
-Power BI then imports the Gold tables through the Fabric SQL endpoint, and DAX measures support the filtering and prioritization in the report.
-
-The final cohort covers 48,118 qualifying cases across 418 procedures. A procedure needs at least 30 qualifying cases to be included in the comparison.
+## How it was built
 
 ```mermaid
 flowchart LR
-    A[MOVER extracts] --> B[Fabric Bronze]
-    B --> C[Fabric Silver]
-    C --> D[Fabric Gold]
-    D --> E[Power BI model and report]
-    E --> F[Public dashboard snapshot]
+    A[MOVER extracts] --> B[Bronze<br/>as received]
+    B --> C[Silver<br/>one row per case]
+    C --> D[Gold<br/>fact + benchmark]
+    D --> E[Power BI<br/>Import model]
+    E --> F[Static HTML]
 ```
+
+**Bronze** keeps the four extracts as strings and reconciles counts against source.
+
+**Silver** resolves duplicates, parses timestamps, repairs what it can, and flags every value it changed.
+
+**Gold** applies eligibility and splits into two grains: a case-level fact table and a procedure-level benchmark. A procedure needs at least 30 qualifying cases to earn a benchmark.
+
+| Checkpoint | Rows |
+|---|---:|
+| Raw `patient_information` | 65,728 |
+| After trim and exact deduplication | 64,362 |
+| After duplicate `log_id` resolution | 64,354 |
+| Final Silver | 64,353 |
+| With a usable OR duration | 57,861 |
+| **Gold cohort** | **48,118** |
 
 ---
 
-## Key findings
+## Results
 
 | Measure | Result |
 |---|---:|
-| Cases within ±30 minutes of the procedure benchmark | 46.7% |
-| Cases outside ±30 minutes | 53.3% |
-| Mean absolute difference | 54.1 minutes |
-| Median absolute difference | 33.0 minutes |
-| Annualized absolute time variation | 452,335 minutes |
-| Annual gross exposure at $35 to $60 per minute | $15.8M to $27.1M |
+| Within ±30 min of benchmark | 46.7% |
+| Outside ±30 min | 53.3% |
+| Mean absolute deviation | 54.1 min |
+| Median absolute deviation | 33.0 min |
+| Annualized absolute deviation | ~452,335 min |
+| Gross exposure at $35/min | $15.8M |
+| Gross exposure at $60/min | $27.1M |
 
-More than half of all cases differ from their historical benchmark by over 30 minutes. The mean is higher than the median, which means a smaller number of large deviations are pulling the average up.
+The mean sitting well above the median means a minority of large deviations pulls the average up. That is why the report leads with distribution rather than an average.
 
-> The dollar figures are a planning scenario, not a measured loss or a savings forecast. They come from total absolute deviation divided by an assumed 5.75-year observation period, multiplied by two illustrative cost-per-minute rates.
-
----
-
-## Recommendations
-
-- Start reviews with procedures that combine high exposure and low reliability. Check case volume and the underlying timing distribution before changing any benchmark.
-- Test proposed benchmarks against a separate, independent set of cases. A benchmark built and checked on the same cases can look better than it will perform going forward.
-- Compare against actual booked durations once that data is available. That is the only way to evaluate real schedule adherence.
-- Use your own organization's cost assumptions. The two rates shown here illustrate scale, not actual accounting figures.
+**The cleaning barely moved the numbers.** Mean absolute deviation went 54.0 to 54.1 and the median stayed at 33.0, after removing 1,366 duplicate rows, repairing 13 corrupt timestamps and excluding one unexplainable case. That is not wasted work. It is a measured demonstration that the conclusions survive the defects found.
 
 ---
 
-## Limitations
+## Read this before quoting a number
 
-The benchmark is retrospective and has not been validated against a holdout set of cases. Cases outside the defined duration rules, and procedures with fewer than 30 qualifying cases, are excluded. MOVER shifts each patient's dates independently, so calendar-based trends like seasonality are not reliable in this data. The analysis shows where variation happens. It does not explain why it happens or whether it can be reduced.
+**The benchmark is not a schedule.** The source does not record what was booked. "Expected" means the procedure's historical median, so this measures predictability against history, not schedule adherence.
+
+**The dollar figures are a scenario.** Total absolute deviation divided by the 5.75-year span, times two illustrative rates. Gross scheduling error, not recoverable waste.
+
+**The benchmark is retrospective** and has not been validated on a holdout set.
+
+**Rare procedures are excluded.** Anything under 30 qualifying cases, which is 16.1% of the operative population. Those are too infrequent to support a reliable median at all.
+
+**No calendar analysis is possible.** MOVER shifts each patient's dates independently, so seasonality, weekday and year-over-year effects cannot be read.
+
+**Age tops out at 90** under HIPAA de-identification, so the oldest band is a mixed group.
+
+This analysis shows *where* variation happens. It does not explain why, or establish that it can be reduced.
 
 ---
 
-## Explore further
+## Documentation
 
-| Resource | What it covers |
+| Document | Covers |
 |---|---|
-| [Dashboard guide](docs/DASHBOARD_GUIDE.md) | How to read the visuals, use the filters, and interpret the review categories |
-| [Data quality and feature engineering](docs/DATA_QUALITY.md) | Duplicate handling, timestamp checks and repairs, cohort rules, validation results |
-| [Data lineage](docs/DATA_LINEAGE.md) | Source-to-Bronze-to-Silver-to-Gold flow, table dependencies, metric origins |
-| [Transformation notebooks](notebooks/) | The Bronze, Silver, and Gold logic |
-
-The live dashboard is a fixed snapshot. Refreshing Fabric or replacing the CSV exports in `dashboard-data/` does not update it automatically.
+| [Model reference](powerbi/MODEL_REFERENCE.md) | Every column and measure in the semantic model, plus how to open the PBIP |
+| [Dashboard guide](docs/DASHBOARD_GUIDE.md) | Reading the visuals, filters, and the review categories |
+| [Data quality](docs/DATA_QUALITY.md) | Profiling, duplicates, timestamp repairs, cohort rules |
+| [Data lineage](docs/DATA_LINEAGE.md) | Source to Bronze to Silver to Gold to report, field by field |
 
 ---
 
-## Skills Demonstrated
+## Data and tech
 
-| Responsibility | How this project demonstrates it |
-|---|---|
-| **Data pipeline development** | Built a Bronze, Silver, and Gold pipeline in Microsoft Fabric using PySpark and SQL, covering ingestion, deduplication, and transformation logic. |
-| **Data quality and cleaning** | Profiled and repaired timestamp and identifier issues, and documented every checkpoint from 65,728 raw rows down to a validated 48,118-case cohort. |
-| **Data modeling** | Designed a case-level fact table and a procedure-level benchmark table, and built the semantic model relationship in Power BI. |
-| **BI reporting and DAX** | Authored DAX measures and an interactive Power BI report with review-category logic, filters, and KPI cards. |
-| **Business analysis** | Framed a scheduling reliability and cost-exposure question, quantified the impact, and translated findings into review recommendations. |
-| **Documentation** | Wrote data lineage, data quality, and dashboard-guide documentation supporting reproducibility and reviewer confidence. |
+Source is [MOVER](https://doi.org/10.24432/C5VS5G), a de-identified perioperative dataset from UC Irvine Medical Center. It requires a data-use agreement, so no raw records are committed here. Four extracts totaling about 1.88 million rows were staged; only patient information continues past Bronze.
 
----
-
-## Tech stack
-
-Microsoft Fabric (Lakehouse, Delta tables, SQL endpoint), PySpark and Spark SQL, Power BI and DAX.
-
----
-
-## Project structure
-
-```text
-OR-Scheduling-Reliability-Analytics/
-├── README.md
-├── index.html          # Opens the public dashboard
-├── assets/             # Power BI overview image
-├── dashboard/          # Interactive HTML dashboard
-├── dashboard-data/     # Power BI CSV exports and old-URL redirect
-├── docs/               # Guide, data quality, and lineage
-└── notebooks/          # Bronze, Silver, and Gold transformations
-```
+Built on Microsoft Fabric (lakehouse, Delta, SQL analytics endpoint), PySpark and Spark SQL, and Power BI with an Import-mode semantic model in TMDL and a PBIR report definition.
