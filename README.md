@@ -161,7 +161,7 @@ CABG is among the most predictable procedures in the cohort once its length is t
 | Gross exposure at $35 per OR minute | **$15.8M** |
 | Gross exposure at $60 per OR minute | **$27.1M** |
 
-> [!WARNING]
+> [!NOTE]
 > **This is a scenario, not a loss.** The benchmark is the median of observed durations, so roughly half of every procedure's cases fall above it by construction. Most of the measured difference is the natural variability of surgery rather than a mistake anyone made, and separating the two would require booked durations this dataset does not contain. Read the range as an upper bound on what better estimating could address.
 
 **Overruns and early finishes are not equal in size.** Cases run long slightly more often than they run short, 1.26 to 1, but when they run long the overshoot is much larger: **107.8 minutes on average against 65.9 minutes** when they finish early, a pattern holding for **388 of the 418 procedures**. Anchoring bookings at the median therefore loses more time to overruns than it recovers from early finishes, roughly **2,300 hours a year**, and that trade is currently being made by default rather than by choice.
